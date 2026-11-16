@@ -56,24 +56,46 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Restore debug keystore
+      - name: Ensure debug keystore exists for CI build
         run: |
-          if [ ! -f debug.keystore ] && [ -f debug.keystore.base64 ]; then
-            base64 -d debug.keystore.base64 > debug.keystore
+          set -euo pipefail
+          if [ ! -f debug.keystore ]; then
+            if [ -s debug.keystore.base64 ]; then
+              echo "Decoding debug.keystore from debug.keystore.base64..."
+              base64 -d debug.keystore.base64 > debug.keystore
+            else
+              echo "Generating standard Android debug.keystore via keytool..."
+              keytool -genkeypair -v \
+                -keystore debug.keystore \
+                -storepass android \
+                -alias androiddebugkey \
+                -keypass android \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US"
+            fi
           fi
+          ls -lh debug.keystore
 
       - name: Make gradlew executable and verify Gradle
         run: |
           chmod +x gradlew
           ./gradlew --version
 
+      - name: Validate Debug Signing
+        run: ./gradlew validateSigningDebug --no-daemon
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Verify Debug APK exists
+      - name: Verify Debug APK exists and is signed
         run: |
+          set -euo pipefail
           ls -lh app/build/outputs/apk/debug/
           test -f app/build/outputs/apk/debug/app-debug.apk
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          "$SDK_ROOT/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
