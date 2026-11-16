@@ -58,6 +58,7 @@ import com.example.model.AudioTechnicalInfo
 import com.example.model.AudioTrack
 import com.example.model.SonaraThemeId
 import com.example.model.SonaraThemeSpec
+import com.example.ui.util.tr
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -89,6 +90,7 @@ fun ThemeAwarePlayerArtwork(
     isPlaying: Boolean,
     spec: SonaraThemeSpec,
     techInfo: AudioTechnicalInfo,
+    isArabic: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val spinTransition = rememberInfiniteTransition(label = "art_spin")
@@ -102,6 +104,7 @@ fun ThemeAwarePlayerArtwork(
         label = "spin_deg"
     )
     val effectiveAngle = if (isPlaying) spinAngle else 0f
+    val defaultArtDesc = tr(isArabic, "Album Art", "غلاف الألبوم")
 
     when (spec.artworkShapeStyle) {
         ArtworkShapeStyle.CASSETTE_SHELL -> {
@@ -110,6 +113,7 @@ fun ThemeAwarePlayerArtwork(
                 isPlaying = isPlaying,
                 spinAngle = effectiveAngle,
                 spec = spec,
+                isArabic = isArabic,
                 modifier = modifier
             )
         }
@@ -137,7 +141,7 @@ fun ThemeAwarePlayerArtwork(
                 ) {
                     SonaraAlbumArt(
                         artUri = track?.albumArtUri,
-                        contentDescription = track?.title ?: "Album Art",
+                        contentDescription = track?.title ?: defaultArtDesc,
                         modifier = Modifier.fillMaxSize(),
                         cornerRadius = 300.dp
                     )
@@ -168,7 +172,7 @@ fun ThemeAwarePlayerArtwork(
             ) {
                 SonaraAlbumArt(
                     artUri = track?.albumArtUri,
-                    contentDescription = track?.title ?: "Album Art",
+                    contentDescription = track?.title ?: defaultArtDesc,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(chamfer),
@@ -202,7 +206,7 @@ fun ThemeAwarePlayerArtwork(
             ) {
                 SonaraAlbumArt(
                     artUri = track?.albumArtUri,
-                    contentDescription = track?.title ?: "Album Art",
+                    contentDescription = track?.title ?: defaultArtDesc,
                     modifier = Modifier.fillMaxSize(),
                     cornerRadius = 0.dp
                 )
@@ -228,7 +232,7 @@ fun ThemeAwarePlayerArtwork(
             ) {
                 SonaraAlbumArt(
                     artUri = track?.albumArtUri,
-                    contentDescription = track?.title ?: "Album Art",
+                    contentDescription = track?.title ?: defaultArtDesc,
                     modifier = Modifier.fillMaxSize(),
                     cornerRadius = spec.cornerRadiusDp.dp
                 )
@@ -244,7 +248,7 @@ fun ThemeAwarePlayerArtwork(
             ) {
                 SonaraAlbumArt(
                     artUri = track?.albumArtUri,
-                    contentDescription = track?.title ?: "Album Art",
+                    contentDescription = track?.title ?: defaultArtDesc,
                     modifier = Modifier.fillMaxSize(),
                     cornerRadius = 2.dp
                 )
@@ -267,7 +271,7 @@ fun ThemeAwarePlayerArtwork(
             ) {
                 SonaraAlbumArt(
                     artUri = track?.albumArtUri,
-                    contentDescription = track?.title ?: "Album Art",
+                    contentDescription = track?.title ?: defaultArtDesc,
                     modifier = Modifier.fillMaxSize(),
                     cornerRadius = r
                 )
@@ -304,6 +308,7 @@ private fun RetroCassetteDeckArtwork(
     isPlaying: Boolean,
     spinAngle: Float,
     spec: SonaraThemeSpec,
+    isArabic: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -335,7 +340,7 @@ private fun RetroCassetteDeckArtwork(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "SIDE A • ${track?.title ?: "SONARA TAPE"}",
+                    text = "${tr(isArabic, "SIDE A", "الوجه أ")} • ${track?.title ?: tr(isArabic, "SONARA TAPE", "شريط سونارا")}",
                     color = spec.textPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
@@ -344,7 +349,7 @@ private fun RetroCassetteDeckArtwork(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = if (isPlaying) "REC/PLAY" else "STBY",
+                    text = if (isPlaying) tr(isArabic, "REC/PLAY", "تشغيل") else tr(isArabic, "STBY", "استعداد"),
                     color = spec.accent,
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp
@@ -405,7 +410,7 @@ private fun RetroCassetteDeckArtwork(
 
                 SonaraAlbumArt(
                     artUri = track?.albumArtUri,
-                    contentDescription = track?.title ?: "Cassette Art",
+                    contentDescription = track?.title ?: tr(isArabic, "Cassette Art", "غلاف الكاسيت"),
                     modifier = Modifier
                         .size(56.dp)
                         .border(1.5.dp, spec.primary, RoundedCornerShape(8.dp)),
@@ -424,7 +429,7 @@ private fun RetroCassetteDeckArtwork(
                     fontSize = 10.sp
                 )
                 Text(
-                    text = track?.artist ?: "ANALOG ENGINE",
+                    text = track?.artist ?: tr(isArabic, "ANALOG ENGINE", "محرك تناظري"),
                     color = spec.primary,
                     fontSize = 10.sp,
                     maxLines = 1,

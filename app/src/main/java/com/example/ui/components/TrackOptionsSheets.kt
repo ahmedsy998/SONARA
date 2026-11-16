@@ -423,7 +423,10 @@ fun ColorPickerDialog(
                     }
                 }
 
-                Text("R: ${(red * 255).toInt()}  G: ${(green * 255).toInt()}  B: ${(blue * 255).toInt()}")
+                val rVal = (red * 255).toInt()
+                val gVal = (green * 255).toInt()
+                val bVal = (blue * 255).toInt()
+                Text(tr(isArabic, "R: $rVal  G: $gVal  B: $bVal", "أحمر: $rVal  أخضر: $gVal  أزرق: $bVal"))
                 Slider(
                     value = red,
                     onValueChange = { red = it },

@@ -18,4 +18,17 @@
     <string name="notification_channel_desc">Controls for active music playback</string>
     <string name="no_track_playing">Nothing Playing</string>
     <string name="tap_to_open">Tap to open SONARA</string>
+    <string name="preparing_playback">Preparing playback…</string>
+    <string name="auto_all_songs">All Songs</string>
+    <string name="auto_favorites">Favorites</string>
+    <string name="auto_albums">Albums</string>
+    <string name="auto_artists">Artists</string>
+    <string name="cd_previous">Previous</string>
+    <string name="cd_play_pause">Play or Pause</string>
+    <string name="cd_next">Next</string>
+    <string name="cd_shuffle">Shuffle</string>
+    <plurals name="track_count">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
 </resources>

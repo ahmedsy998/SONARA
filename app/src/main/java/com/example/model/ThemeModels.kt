@@ -113,14 +113,17 @@ enum class UiDensity(val labelEn: String, val labelAr: String, val scale: Float)
     SPACIOUS("Spacious", "واسع", 1.16f)
 }
 
-enum class FontChoice(val labelEn: String, val labelAr: String) {
-    THEME_DEFAULT("Theme Default", "افتراضي الثيم"),
+enum class FontChoice(val labelEn: String, val labelAr: String, val isArabicFriendly: Boolean = false) {
+    THEME_DEFAULT("Theme Default", "افتراضي الثيم", true),
     PLUS_JAKARTA("Plus Jakarta Sans", "جاكرتا سانس"),
     SPACE_GROTESK("Space Grotesk", "سبيس غروتيسك"),
     PLAYFAIR("Playfair Display", "بلاي فير سيريف"),
     JETBRAINS_MONO("JetBrains Mono", "جيت برينز مونو"),
-    CAIRO("Cairo (Arabic+Latin)", "القاهرة (عربي + إنجليزي)"),
-    AMIRI("Amiri Editorial", "أميري كلاسيكي")
+    CAIRO("Cairo", "القاهرة (Cairo)", true),
+    TAJAWAL("Tajawal", "تجوال (Tajawal)", true),
+    IBM_PLEX_ARABIC("IBM Plex Sans Arabic", "آي بي إم بليكس عربي", true),
+    NOTO_SANS_ARABIC("Noto Sans Arabic", "نوتو سانس عربي", true),
+    AMIRI("Amiri Editorial", "أميري كلاسيكي (Amiri)", true)
 }
 
 enum class NavStyle {
@@ -209,6 +212,7 @@ enum class BackgroundTreatment {
 data class ThemePalettePreset(
     val id: String,
     val name: String,
+    val nameAr: String,
     val primaryHex: Long,
     val secondaryHex: Long,
     val accentHex: Long,
@@ -237,6 +241,7 @@ data class ThemeCustomizations(
     val cornerRadiusDp: Float = 20f,
     val uiDensity: String = UiDensity.COMFORTABLE.name,
     val fontChoice: String = FontChoice.THEME_DEFAULT.name,
+    val preferredArabicFont: String = FontChoice.CAIRO.name,
     val dynamicAlbumArtColors: Boolean = true
 )
 
@@ -274,6 +279,7 @@ data class SonaraThemeSpec(
     val cornerRadiusDp: Float,
     val density: UiDensity,
     val fontChoice: FontChoice,
+    val preferredArabicFont: FontChoice = FontChoice.CAIRO,
     val navStyle: NavStyle,
     val playerLayoutStyle: PlayerLayoutStyle,
     val artworkShapeStyle: ArtworkShapeStyle,

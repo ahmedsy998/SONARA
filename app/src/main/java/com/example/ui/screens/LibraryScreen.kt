@@ -128,7 +128,7 @@ fun LibraryScreen(
             if (selectedTrackIds.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onClearSelection) {
-                        Icon(Icons.Filled.Close, contentDescription = "Clear selection", tint = spec.textPrimary)
+                        Icon(Icons.Filled.Close, contentDescription = tr(isArabic, "Clear selection", "إلغاء التحديد"), tint = spec.textPrimary)
                     }
                     Text(
                         text = "${selectedTrackIds.size} ${tr(isArabic, "selected", "محدد")}",
@@ -139,13 +139,13 @@ fun LibraryScreen(
                 }
                 Row {
                     IconButton(onClick = { onBatchAddToPlaylist(selectedTrackIds) }) {
-                        Icon(Icons.Filled.PlaylistAdd, contentDescription = "Add selected to playlist", tint = spec.primary)
+                        Icon(Icons.Filled.PlaylistAdd, contentDescription = tr(isArabic, "Add selected to playlist", "إضافة المحدد لقائمة"), tint = spec.primary)
                     }
                     if (selectedTrackIds.size == 1) {
                         val t = allTracks.firstOrNull { it.id == selectedTrackIds.first() }
                         if (t != null) {
                             IconButton(onClick = { onShareTrack(t) }) {
-                                Icon(Icons.Filled.Share, contentDescription = "Share", tint = spec.textPrimary)
+                                Icon(Icons.Filled.Share, contentDescription = tr(isArabic, "Share", "مشاركة"), tint = spec.textPrimary)
                             }
                         }
                     }
@@ -153,7 +153,7 @@ fun LibraryScreen(
             } else if (drillTitle != null) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     IconButton(onClick = { drillTitle = null; drillTracks = emptyList() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = spec.textPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr(isArabic, "Back", "رجوع"), tint = spec.textPrimary)
                     }
                     Text(
                         text = drillTitle.orEmpty(),
@@ -346,7 +346,7 @@ fun LibraryScreen(
                                     )
                                     Spacer(Modifier.height(8.dp))
                                     Text(album.name, color = spec.textPrimary, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text("${album.artist} • ${album.tracks.size}", color = spec.textSecondary, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                                    Text("${album.artist} • ${album.tracks.size} ${tr(isArabic, "tracks", "مقاطع")}", color = spec.textSecondary, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
                                 }
                             }
                         }

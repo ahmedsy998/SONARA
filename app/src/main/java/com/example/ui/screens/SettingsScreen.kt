@@ -57,6 +57,7 @@ import com.example.data.PlaybackPreferences
 import com.example.model.AppLanguage
 import com.example.model.EqualizerConfig
 import com.example.model.EqualizerPreset
+import com.example.model.FontChoice
 import com.example.model.SonaraThemeId
 import com.example.model.SonaraThemeSpec
 import com.example.model.VisualizerStyle
@@ -89,6 +90,7 @@ fun SettingsScreen(
     onSetVisualizerStyle: (VisualizerStyle) -> Unit,
     onToggleLiveVisualizer: (Boolean) -> Unit,
     onSetLanguage: (AppLanguage) -> Unit,
+    onSetPreferredArabicFont: (FontChoice) -> Unit,
     onRescanLibrary: () -> Unit,
     onShowMessage: (String) -> Unit
 ) {
@@ -190,11 +192,16 @@ fun SettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                val freqText = if (freq.endsWith("k")) {
+                                    "${freq.dropLast(1)}${tr(isArabic, "kHz", " ك.هـ")}"
+                                } else {
+                                    "$freq ${tr(isArabic, "Hz", "هـ")}"
+                                }
                                 Text(
-                                    text = "${freq}Hz",
+                                    text = freqText,
                                     color = spec.textSecondary,
                                     style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.width(46.dp)
+                                    modifier = Modifier.width(52.dp)
                                 )
                                 Slider(
                                     value = dbVal.toFloat(),
@@ -215,10 +222,10 @@ fun SettingsScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(
-                                    text = "${if (dbVal > 0) "+" else ""}${dbVal}dB",
+                                    text = "${if (dbVal > 0) "+" else ""}${dbVal} ${tr(isArabic, "dB", "ديسيبل")}",
                                     color = spec.primary,
                                     style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.width(42.dp)
+                                    modifier = Modifier.width(56.dp)
                                 )
                             }
                         }
@@ -268,9 +275,9 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("SONARA WIDGET", color = wAccent, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                            Text("Now Playing Track", color = wText, fontWeight = FontWeight.Bold)
-                            Text("Artist Name", color = wText.copy(alpha = 0.7f), style = MaterialTheme.typography.bodyMedium)
+                            Text(tr(isArabic, "SONARA WIDGET", "ويدجت سونارا"), color = wAccent, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            Text(tr(isArabic, "Now Playing Track", "المقطع قيد التشغيل"), color = wText, fontWeight = FontWeight.Bold)
+                            Text(tr(isArabic, "Artist Name", "اسم الفنان"), color = wText.copy(alpha = 0.7f), style = MaterialTheme.typography.bodyMedium)
                         }
                         Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = wAccent, modifier = Modifier.size(34.dp))
                     }
@@ -335,10 +342,10 @@ fun SettingsScreen(
                             Text(tr(isArabic, "Pin Real Home Screen Widget:", "تثبيت ويدجت على الشاشة الرئيسية:"), color = spec.textSecondary)
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 val providers = listOf(
-                                    "Compact 4x1" to SonaraCompactWidgetProvider::class.java,
-                                    "Glass 4x2" to SonaraGlassWidgetProvider::class.java,
-                                    "Large 4x3" to SonaraLargeWidgetProvider::class.java,
-                                    "Minimal 2x2" to SonaraMinimalWidgetProvider::class.java
+                                    tr(isArabic, "Compact 4x1", "مدمج 4×1") to SonaraCompactWidgetProvider::class.java,
+                                    tr(isArabic, "Glass 4x2", "زجاجي 4×2") to SonaraGlassWidgetProvider::class.java,
+                                    tr(isArabic, "Large 4x3", "كبير 4×3") to SonaraLargeWidgetProvider::class.java,
+                                    tr(isArabic, "Minimal 2x2", "بسيط 2×2") to SonaraMinimalWidgetProvider::class.java
                                 )
                                 items(providers) { (label, cls) ->
                                     OutlinedButton(onClick = {
@@ -360,15 +367,44 @@ fun SettingsScreen(
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Filled.Language, contentDescription = null, tint = spec.primary)
-                        Text(tr(isArabic, "Language & Playback", "اللغة والتشغيل"), color = spec.textPrimary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(tr(isArabic, "Language & Playback", "اللغة والخطوط والتشغيل"), color = spec.textPrimary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         AppLanguage.entries.forEach { lang ->
+                            val langLabel = when (lang) {
+                                AppLanguage.ENGLISH -> "English"
+                                AppLanguage.ARABIC -> "العربية"
+                                AppLanguage.SYSTEM -> tr(isArabic, "System", "لغة النظام")
+                            }
                             FilterChip(
                                 selected = playbackPrefs.language == lang,
                                 onClick = { onSetLanguage(lang) },
-                                label = { Text(lang.label) }
+                                label = { Text(langLabel) },
+                                modifier = Modifier.testTag("lang_chip_${lang.code}")
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = tr(isArabic, "Preferred Arabic Font", "الخط العربي المفضّل"),
+                        color = spec.textSecondary,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    val arabicFonts = listOf(
+                        FontChoice.CAIRO,
+                        FontChoice.TAJAWAL,
+                        FontChoice.IBM_PLEX_ARABIC,
+                        FontChoice.NOTO_SANS_ARABIC,
+                        FontChoice.AMIRI
+                    )
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(arabicFonts) { font ->
+                            FilterChip(
+                                selected = spec.preferredArabicFont == font,
+                                onClick = { onSetPreferredArabicFont(font) },
+                                label = { Text(tr(isArabic, font.labelEn, font.labelAr)) },
+                                modifier = Modifier.testTag("arabic_font_${font.name.lowercase()}")
                             )
                         }
                     }
@@ -432,7 +468,7 @@ fun SettingsScreen(
                         text = tr(
                             isArabic,
                             "SONARA uses AndroidX Media3 MediaLibraryService for background playback, Bluetooth AVRCP controls, Android Auto browsing, and system lock-screen media controls. On Android 10–14+ (including HyperOS / MIUI), lock-screen card layout and button placement are controlled by the system UI.",
-                            "SONARA uses AndroidX Media3 MediaLibraryService for genuine background playback, Bluetooth headset controls, Android Auto browsing, and system lock-screen media notifications. On Android 10–14+ (including Xiaomi HyperOS), lock-screen media card styling and button placement are managed by Android SystemUI and cannot be overridden by third-party apps."
+                            "يعتمد SONARA على خدمة Media3 MediaLibraryService من AndroidX لتشغيل الموسيقى في الخلفية والتحكم عبر البلوتوث وAndroid Auto وإشعارات شاشة القفل. في أنظمة أندرويد 10–14+ (بما فيها HyperOS وMIUI)، يتم التحكم في شكل بطاقة شاشة القفل وموضع أزرارها تلقائياً من واجهة النظام."
                         ),
                         color = spec.textSecondary,
                         style = MaterialTheme.typography.bodyMedium
@@ -448,8 +484,13 @@ fun SettingsScreen(
             WidgetColorTarget.TEXT -> widgetCustomizations.textColorHex
             WidgetColorTarget.ACCENT -> widgetCustomizations.accentColorHex
         }
+        val targetTitle = when (target) {
+            WidgetColorTarget.BG -> tr(isArabic, "Widget Background Color", "لون خلفية الويدجت")
+            WidgetColorTarget.TEXT -> tr(isArabic, "Widget Text Color", "لون نص الويدجت")
+            WidgetColorTarget.ACCENT -> tr(isArabic, "Widget Accent Color", "لون تمييز الويدجت")
+        }
         ColorPickerDialog(
-            title = "Widget ${target.name}",
+            title = targetTitle,
             initialHex = initHex,
             isArabic = isArabic,
             onDismiss = { widgetColorTarget = null },

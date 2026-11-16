@@ -153,7 +153,7 @@ fun HomeScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.img_sonara_hero),
-                    contentDescription = "SONARA Soundstage",
+                    contentDescription = tr(isArabic, "SONARA Soundstage", "مسرح صوت سونارا"),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                     alpha = if (spec.isDark) 0.52f else 0.35f

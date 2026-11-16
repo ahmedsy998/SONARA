@@ -407,6 +407,7 @@ fun SonaraAppRoot(
                                                 }
                                             },
                                             onSetLanguage = viewModel::setLanguage,
+                                            onSetPreferredArabicFont = viewModel::setPreferredArabicFont,
                                             onRescanLibrary = viewModel::rescanLibrary,
                                             onShowMessage = viewModel::showMessage
                                         )
@@ -492,7 +493,7 @@ fun SonaraAppRoot(
                     enter = fadeIn(),
                     exit = fadeOut(animationSpec = tween(420))
                 ) {
-                    SonaraSplashOverlay()
+                    SonaraSplashOverlay(isArabic = isArabic)
                 }
             }
 
@@ -542,7 +543,7 @@ fun SonaraAppRoot(
 }
 
 @Composable
-private fun SonaraSplashOverlay() {
+private fun SonaraSplashOverlay(isArabic: Boolean) {
     val scale = remember { Animatable(0.84f) }
     val alpha = remember { Animatable(0f) }
 
@@ -570,7 +571,7 @@ private fun SonaraSplashOverlay() {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_sonara_fg),
-                contentDescription = "SONARA Logo",
+                contentDescription = tr(isArabic, "SONARA Logo", "شعار سونارا"),
                 modifier = Modifier
                     .size(116.dp)
                     .clip(RoundedCornerShape(28.dp))
@@ -581,14 +582,14 @@ private fun SonaraSplashOverlay() {
                 color = Color.White,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 6.sp
+                letterSpacing = if (isArabic) 2.sp else 6.sp
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "ADAPTIVE AUDIO ARCHITECTURE",
+                text = tr(isArabic, "ADAPTIVE AUDIO ARCHITECTURE", "هندسة صوتية متكيفة"),
                 color = Color(0xFF38BDF8),
                 style = MaterialTheme.typography.labelSmall,
-                letterSpacing = 2.5.sp
+                letterSpacing = if (isArabic) 0.sp else 2.5.sp
             )
         }
     }

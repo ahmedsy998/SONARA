@@ -105,7 +105,7 @@ fun SearchScreen(
                 trailingIcon = {
                     if (query.isNotEmpty()) {
                         IconButton(onClick = { onQueryChange("") }) {
-                            Icon(Icons.Filled.Clear, contentDescription = "Clear", tint = spec.textSecondary)
+                            Icon(Icons.Filled.Clear, contentDescription = tr(isArabic, "Clear", "مسح"), tint = spec.textSecondary)
                         }
                     }
                 },
@@ -180,7 +180,7 @@ fun SearchScreen(
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(album.name, color = spec.textPrimary, style = MaterialTheme.typography.titleMedium)
-                            Text("${album.artist} • ${album.tracks.size} tracks", color = spec.textSecondary, style = MaterialTheme.typography.bodyMedium)
+                            Text("${album.artist} • ${album.tracks.size} ${tr(isArabic, "tracks", "مقاطع")}", color = spec.textSecondary, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }

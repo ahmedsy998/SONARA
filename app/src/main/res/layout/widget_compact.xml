@@ -3,6 +3,7 @@
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layoutDirection="locale"
     android:padding="4dp">
 
     <ImageView
@@ -17,6 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
+        android:layoutDirection="locale"
         android:orientation="horizontal"
         android:paddingStart="10dp"
         android:paddingEnd="8dp"
@@ -46,7 +48,9 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="@string/no_track_playing"
+                android:textAlignment="viewStart"
                 android:textColor="@color/widget_text_primary"
+                android:textDirection="locale"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -57,32 +61,42 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="@string/tap_to_open"
+                android:textAlignment="viewStart"
                 android:textColor="@color/widget_text_secondary"
+                android:textDirection="locale"
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/widget_btn_prev"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_widget_prev"
-            android:contentDescription="Previous" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/widget_btn_play_pause"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_widget_play"
-            android:contentDescription="Play or Pause" />
+            <ImageButton
+                android:id="@+id/widget_btn_prev"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_widget_prev"
+                android:contentDescription="@string/cd_previous" />
 
-        <ImageButton
-            android:id="@+id/widget_btn_next"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_widget_next"
-            android:contentDescription="Next" />
+            <ImageButton
+                android:id="@+id/widget_btn_play_pause"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_widget_play"
+                android:contentDescription="@string/cd_play_pause" />
+
+            <ImageButton
+                android:id="@+id/widget_btn_next"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_widget_next"
+                android:contentDescription="@string/cd_next" />
+        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

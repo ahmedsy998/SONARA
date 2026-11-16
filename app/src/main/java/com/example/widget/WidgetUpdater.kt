@@ -27,8 +27,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 data class WidgetPlaybackSnapshot(
-    val title: String = "Nothing Playing",
-    val artist: String = "Tap to open SONARA",
+    val title: String = "",
+    val artist: String = "",
     val isPlaying: Boolean = false,
     val isShuffle: Boolean = false,
     val positionMs: Long = 0L,
@@ -54,10 +54,12 @@ object WidgetUpdater {
     fun updateAllWidgets(
         context: Context,
         snapshot: WidgetPlaybackSnapshot,
-        customizations: WidgetCustomizations
+        customizations: WidgetCustomizations,
+        language: com.example.model.AppLanguage = com.example.model.AppLanguage.SYSTEM
     ) {
         lastSnapshot = snapshot
         scope.launch {
+            val localizedCtx = com.example.ui.util.localizedForHelper(context, language)
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val artBitmap = loadRoundedArtworkBitmap(context, snapshot.artworkUri, 192, 24f)
 
@@ -73,6 +75,8 @@ object WidgetUpdater {
                 if (ids.isEmpty()) continue
                 val views = buildRemoteViews(
                     context = context,
+                    localizedContext = localizedCtx,
+                    isArabic = com.example.ui.util.isArabicLanguage(language),
                     layoutRes = layoutRes,
                     snapshot = snapshot,
                     customizations = customizations,
@@ -85,6 +89,8 @@ object WidgetUpdater {
 
     private fun buildRemoteViews(
         context: Context,
+        localizedContext: Context,
+        isArabic: Boolean,
         layoutRes: Int,
         snapshot: WidgetPlaybackSnapshot,
         customizations: WidgetCustomizations,
@@ -113,14 +119,21 @@ object WidgetUpdater {
         )
         views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
 
-        views.setTextViewText(R.id.widget_title, snapshot.title)
-        views.setTextViewText(R.id.widget_artist, snapshot.artist)
+        val resolvedTitle = snapshot.title.ifBlank {
+            localizedContext.getString(R.string.no_track_playing)
+        }
+        val resolvedArtist = snapshot.artist.ifBlank {
+            localizedContext.getString(R.string.tap_to_open)
+        }
+        views.setTextViewText(R.id.widget_title, resolvedTitle)
+        views.setTextViewText(R.id.widget_artist, resolvedArtist)
         views.setTextColor(R.id.widget_title, textPrimaryInt)
         views.setTextColor(R.id.widget_artist, textSecondaryInt)
 
         if (layoutRes == R.layout.widget_glass || layoutRes == R.layout.widget_large) {
             views.setTextColor(R.id.widget_badge, accentInt)
-            views.setTextViewText(R.id.widget_badge, "SONARA • ${themeSpec.id.displayNameEn.uppercase()}")
+            val themeLabel = if (isArabic) themeSpec.id.displayNameAr else themeSpec.id.displayNameEn.uppercase()
+            views.setTextViewText(R.id.widget_badge, "SONARA • $themeLabel")
         }
 
         // Artwork
@@ -272,6 +285,6 @@ object WidgetUpdater {
         val totalSec = (ms / 1000L).coerceAtLeast(0L)
         val min = totalSec / 60L
         val sec = totalSec % 60L
-        return "%d:%02d".format(min, sec)
+        return String.format(java.util.Locale.US, "%d:%02d", min, sec)
     }
 }

@@ -37,7 +37,7 @@ data class PlaybackPreferences(
     val lastQueueIds: List<Long> = emptyList(),
     val sortOrder: SortOrder = SortOrder.TITLE_ASC,
     val isGridLayout: Boolean = false,
-    val language: AppLanguage = AppLanguage.ENGLISH
+    val language: AppLanguage = AppLanguage.SYSTEM
 )
 
 class SonaraPreferencesRepository(private val context: Context) {
@@ -108,7 +108,7 @@ class SonaraPreferencesRepository(private val context: Context) {
             isGridLayout = prefs[Keys.GRID_LAYOUT] ?: false,
             language = prefs[Keys.LANGUAGE]?.let { code ->
                 AppLanguage.entries.firstOrNull { it.code == code }
-            } ?: AppLanguage.ENGLISH
+            } ?: AppLanguage.SYSTEM
         )
     }
 

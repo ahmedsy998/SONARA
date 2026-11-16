@@ -14,11 +14,13 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import com.example.MainActivity
+import com.example.R
 import com.example.data.AudioLibraryRepository
 import com.example.data.SonaraDatabase
 import com.example.data.SonaraPreferencesRepository
+import com.example.model.AppLanguage
 import com.example.model.AudioTrack
+import com.example.ui.util.localizedFor
 import com.example.widget.WidgetPlaybackSnapshot
 import com.example.widget.WidgetUpdater
 import com.google.common.collect.ImmutableList
@@ -55,6 +57,8 @@ class SonaraPlaybackService : MediaLibraryService() {
     private lateinit var libraryRepo: AudioLibraryRepository
     private var widgetTickerJob: Job? = null
     private var cachedTracks: List<AudioTrack> = emptyList()
+    @Volatile
+    private var currentLanguage: AppLanguage = AppLanguage.SYSTEM
 
     override fun onCreate() {
         super.onCreate()
@@ -109,10 +113,15 @@ class SonaraPlaybackService : MediaLibraryService() {
             }
         })
 
-        // Observe pause-on-disconnect preference dynamically
+        // Observe playback preferences (disconnect behavior & active app language)
         serviceScope.launch {
             prefsRepo.playbackPreferences.collect { prefs ->
+                val langChanged = currentLanguage != prefs.language
+                currentLanguage = prefs.language
                 player.setHandleAudioBecomingNoisy(prefs.pauseOnHeadphoneDisconnect)
+                if (langChanged) {
+                    pushWidgetUpdate()
+                }
             }
         }
 
@@ -126,7 +135,7 @@ class SonaraPlaybackService : MediaLibraryService() {
         val sessionActivityPendingIntent = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java).apply {
+            Intent(this, com.example.MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra("open_player", true)
             },
@@ -149,10 +158,11 @@ class SonaraPlaybackService : MediaLibraryService() {
 
     private fun ensureForegroundSafeguard() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && !player.isPlaying) {
+            val locCtx = applicationContext.localizedFor(currentLanguage)
             val notification = androidx.core.app.NotificationCompat.Builder(this, "sonara_playback_channel")
-                .setSmallIcon(com.example.R.drawable.ic_widget_play)
+                .setSmallIcon(R.drawable.ic_widget_play)
                 .setContentTitle("SONARA")
-                .setContentText("Preparing playback...")
+                .setContentText(locCtx.getString(R.string.preparing_playback))
                 .setSilent(true)
                 .build()
             runCatching { startForeground(1001, notification) }
@@ -220,8 +230,8 @@ class SonaraPlaybackService : MediaLibraryService() {
         val item = player.currentMediaItem
         val meta = item?.mediaMetadata
         val snapshot = WidgetPlaybackSnapshot(
-            title = meta?.title?.toString()?.takeIf { it.isNotBlank() } ?: "Nothing Playing",
-            artist = meta?.artist?.toString()?.takeIf { it.isNotBlank() } ?: "Tap to open SONARA",
+            title = meta?.title?.toString()?.takeIf { it.isNotBlank() } ?: "",
+            artist = meta?.artist?.toString()?.takeIf { it.isNotBlank() } ?: "",
             isPlaying = player.isPlaying,
             isShuffle = player.shuffleModeEnabled,
             positionMs = player.currentPosition.coerceAtLeast(0L),
@@ -230,7 +240,9 @@ class SonaraPlaybackService : MediaLibraryService() {
         )
         serviceScope.launch(Dispatchers.IO) {
             val widgetPrefs = prefsRepo.getWidgetCustomizationsSnapshot()
-            WidgetUpdater.updateAllWidgets(applicationContext, snapshot, widgetPrefs)
+            val playPrefs = prefsRepo.getPlaybackPreferencesSnapshot()
+            currentLanguage = playPrefs.language
+            WidgetUpdater.updateAllWidgets(applicationContext, snapshot, widgetPrefs, playPrefs.language)
         }
     }
 
@@ -292,12 +304,13 @@ class SonaraPlaybackService : MediaLibraryService() {
                 if (cachedTracks.isEmpty()) {
                     cachedTracks = libraryRepo.scanLocalAudio()
                 }
+                val locCtx = applicationContext.localizedFor(currentLanguage)
                 val children: List<MediaItem> = when (parentId) {
                     ROOT_ID -> listOf(
-                        browsableFolder(NODE_ALL_SONGS, "All Songs", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
-                        browsableFolder(NODE_FAVORITES, "Favorites", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
-                        browsableFolder(NODE_ALBUMS, "Albums", MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS),
-                        browsableFolder(NODE_ARTISTS, "Artists", MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS)
+                        browsableFolder(NODE_ALL_SONGS, locCtx.getString(R.string.auto_all_songs), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
+                        browsableFolder(NODE_FAVORITES, locCtx.getString(R.string.auto_favorites), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
+                        browsableFolder(NODE_ALBUMS, locCtx.getString(R.string.auto_albums), MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS),
+                        browsableFolder(NODE_ARTISTS, locCtx.getString(R.string.auto_artists), MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS)
                     )
                     NODE_ALL_SONGS -> cachedTracks.map { it.toMediaItem() }
                     NODE_FAVORITES -> cachedTracks.filter { it.isFavorite }.map { it.toMediaItem() }

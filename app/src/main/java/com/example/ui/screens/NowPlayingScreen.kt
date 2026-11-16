@@ -58,6 +58,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -71,13 +72,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 import com.example.model.AudioTechnicalInfo
 import com.example.model.AudioTrack
 import com.example.model.LrcLine
@@ -183,7 +187,7 @@ fun NowPlayingScreen(
                         .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.55f))
                 ) {
-                    Icon(Icons.Filled.FullscreenExit, contentDescription = "Exit full screen art", tint = Color.White)
+                    Icon(Icons.Filled.FullscreenExit, contentDescription = tr(isArabic, "Exit full screen art", "إغلاق العرض الكامل للغلاف"), tint = Color.White)
                 }
                 Column(
                     modifier = Modifier
@@ -216,9 +220,9 @@ fun NowPlayingScreen(
                         Text(
                             text = when (spec.playerLayoutStyle) {
                                 PlayerLayoutStyle.EDITORIAL_COVER_SPREAD -> tr(isArabic, "SONARA EDITION", "إصدار سونارا")
-                                PlayerLayoutStyle.RETRO_CASSETTE_DECK -> "DECK A • HI-FI"
-                                PlayerLayoutStyle.WALKMAN_JOG_WHEEL -> "WALKMAN ENGINE"
-                                PlayerLayoutStyle.NOTHING_GLYPH_DIAL -> "GLYPH // AUDIO"
+                                PlayerLayoutStyle.RETRO_CASSETTE_DECK -> tr(isArabic, "DECK A • HI-FI", "كاسيت A • هاي فاي")
+                                PlayerLayoutStyle.WALKMAN_JOG_WHEEL -> tr(isArabic, "WALKMAN ENGINE", "محرك ووكمان")
+                                PlayerLayoutStyle.NOTHING_GLYPH_DIAL -> tr(isArabic, "GLYPH // AUDIO", "غليف // صوت")
                                 else -> tr(isArabic, "NOW PLAYING", "قيد التشغيل الآن")
                             },
                             color = spec.primary,
@@ -229,7 +233,7 @@ fun NowPlayingScreen(
                             val mins = playbackState.sleepTimerRemainingSec / 60
                             val secs = playbackState.sleepTimerRemainingSec % 60
                             Text(
-                                text = "⏱ %d:%02d".format(mins, secs),
+                                text = String.format(Locale.US, "⏱ %d:%02d", mins, secs),
                                 color = spec.accent,
                                 style = MaterialTheme.typography.labelSmall
                             )
@@ -238,11 +242,11 @@ fun NowPlayingScreen(
 
                     Row {
                         IconButton(onClick = { fullScreenArtMode = true }) {
-                            Icon(Icons.Filled.Fullscreen, contentDescription = "Full screen art", tint = spec.textPrimary)
+                            Icon(Icons.Filled.Fullscreen, contentDescription = tr(isArabic, "Full screen art", "عرض الغلاف بالكامل"), tint = spec.textPrimary)
                         }
                         if (track != null) {
                             IconButton(onClick = { onOpenTrackOptions(track) }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = "Options", tint = spec.textPrimary)
+                                Icon(Icons.Filled.MoreVert, contentDescription = tr(isArabic, "Options", "خيارات"), tint = spec.textPrimary)
                             }
                         }
                     }
@@ -277,6 +281,7 @@ fun NowPlayingScreen(
                         isPlaying = playbackState.isPlaying,
                         spec = spec,
                         techInfo = techInfo,
+                        isArabic = isArabic,
                         modifier = Modifier
                             .fillMaxWidth(0.84f)
                             .clickable { fullScreenArtMode = true }
@@ -340,123 +345,125 @@ fun NowPlayingScreen(
                     }
                 }
 
-                // Progress Scrubber
+                // Progress Scrubber (keep standard LTR audio timeline & transport order even in RTL Arabic)
                 val dur = playbackState.durationMs.coerceAtLeast(1L)
                 var scrubbing by remember { mutableStateOf(false) }
                 var scrubValue by remember { mutableFloatStateOf(0f) }
                 val sliderPos = if (scrubbing) scrubValue else (playbackState.positionMs.toFloat() / dur).coerceIn(0f, 1f)
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Slider(
-                        value = sliderPos,
-                        onValueChange = {
-                            scrubbing = true
-                            scrubValue = it
-                        },
-                        onValueChangeFinished = {
-                            onSeek((scrubValue * dur).toLong())
-                            scrubbing = false
-                        },
-                        colors = SliderDefaults.colors(
-                            thumbColor = spec.primary,
-                            activeTrackColor = spec.primary,
-                            inactiveTrackColor = spec.borderColor.copy(alpha = 0.35f)
-                        ),
-                        modifier = Modifier.testTag("player_seek_slider")
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = formatDuration(if (scrubbing) (scrubValue * dur).toLong() else playbackState.positionMs),
-                            color = spec.textSecondary,
-                            style = MaterialTheme.typography.labelSmall
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Slider(
+                            value = sliderPos,
+                            onValueChange = {
+                                scrubbing = true
+                                scrubValue = it
+                            },
+                            onValueChangeFinished = {
+                                onSeek((scrubValue * dur).toLong())
+                                scrubbing = false
+                            },
+                            colors = SliderDefaults.colors(
+                                thumbColor = spec.primary,
+                                activeTrackColor = spec.primary,
+                                inactiveTrackColor = spec.borderColor.copy(alpha = 0.35f)
+                            ),
+                            modifier = Modifier.testTag("player_seek_slider")
                         )
-                        val remaining = (dur - playbackState.positionMs).coerceAtLeast(0L)
-                        Text(
-                            text = "-${formatDuration(remaining)}",
-                            color = spec.textSecondary,
-                            style = MaterialTheme.typography.labelSmall
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = formatDuration(if (scrubbing) (scrubValue * dur).toLong() else playbackState.positionMs),
+                                color = spec.textSecondary,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            val remaining = (dur - playbackState.positionMs).coerceAtLeast(0L)
+                            Text(
+                                text = "-${formatDuration(remaining)}",
+                                color = spec.textSecondary,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
                     }
-                }
 
-                // Theme-Specific Transport Controls Deck
-                SonaraThemedCardSurface(
-                    spec = spec,
-                    elevated = true,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                    // Theme-Specific Transport Controls Deck
+                    SonaraThemedCardSurface(
+                        spec = spec,
+                        elevated = true,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        IconButton(onClick = onToggleShuffle, modifier = Modifier.testTag("player_shuffle_btn")) {
-                            Icon(
-                                imageVector = Icons.Filled.Shuffle,
-                                contentDescription = "Shuffle",
-                                tint = if (playbackState.shuffleEnabled) spec.primary else spec.textSecondary
-                            )
-                        }
-
-                        IconButton(
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onPrevious()
-                            },
-                            modifier = Modifier.testTag("player_prev_btn")
-                        ) {
-                            Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", tint = spec.textPrimary, modifier = Modifier.size(34.dp))
-                        }
-
-                        val playShape = when (spec.playerLayoutStyle) {
-                            PlayerLayoutStyle.CYBERPUNK_HUD_DECK -> CutCornerShape(14.dp)
-                            PlayerLayoutStyle.RETRO_CASSETTE_DECK,
-                            PlayerLayoutStyle.FLUENT_STUDIO_PANEL -> RoundedCornerShape(12.dp)
-                            else -> CircleShape
-                        }
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .size(66.dp)
-                                .clip(playShape)
-                                .background(
-                                    Brush.linearGradient(listOf(spec.primary, spec.secondary))
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = onToggleShuffle, modifier = Modifier.testTag("player_shuffle_btn")) {
+                                Icon(
+                                    imageVector = Icons.Filled.Shuffle,
+                                    contentDescription = tr(isArabic, "Shuffle", "تشغيل عشوائي"),
+                                    tint = if (playbackState.shuffleEnabled) spec.primary else spec.textSecondary
                                 )
-                                .clickable {
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onPlayPause()
-                                }
-                                .testTag("player_play_pause_btn"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (playbackState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                contentDescription = "Play or Pause",
-                                tint = Color.Black,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                            }
 
-                        IconButton(
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onNext()
-                            },
-                            modifier = Modifier.testTag("player_next_btn")
-                        ) {
-                            Icon(Icons.Filled.SkipNext, contentDescription = "Next", tint = spec.textPrimary, modifier = Modifier.size(34.dp))
-                        }
+                            IconButton(
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onPrevious()
+                                },
+                                modifier = Modifier.testTag("player_prev_btn")
+                            ) {
+                                Icon(Icons.Filled.SkipPrevious, contentDescription = tr(isArabic, "Previous", "السابق"), tint = spec.textPrimary, modifier = Modifier.size(34.dp))
+                            }
 
-                        IconButton(onClick = onCycleRepeat, modifier = Modifier.testTag("player_repeat_btn")) {
-                            Icon(
-                                imageVector = if (playbackState.repeatMode == RepeatModeState.ONE) Icons.Filled.RepeatOne else Icons.Filled.Repeat,
-                                contentDescription = "Repeat",
-                                tint = if (playbackState.repeatMode != RepeatModeState.OFF) spec.primary else spec.textSecondary
-                            )
+                            val playShape = when (spec.playerLayoutStyle) {
+                                PlayerLayoutStyle.CYBERPUNK_HUD_DECK -> CutCornerShape(14.dp)
+                                PlayerLayoutStyle.RETRO_CASSETTE_DECK,
+                                PlayerLayoutStyle.FLUENT_STUDIO_PANEL -> RoundedCornerShape(12.dp)
+                                else -> CircleShape
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(66.dp)
+                                    .clip(playShape)
+                                    .background(
+                                        Brush.linearGradient(listOf(spec.primary, spec.secondary))
+                                    )
+                                    .clickable {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onPlayPause()
+                                    }
+                                    .testTag("player_play_pause_btn"),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (playbackState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                    contentDescription = tr(isArabic, "Play or Pause", "تشغيل أو إيقاف مؤقت"),
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onNext()
+                                },
+                                modifier = Modifier.testTag("player_next_btn")
+                            ) {
+                                Icon(Icons.Filled.SkipNext, contentDescription = tr(isArabic, "Next", "التالي"), tint = spec.textPrimary, modifier = Modifier.size(34.dp))
+                            }
+
+                            IconButton(onClick = onCycleRepeat, modifier = Modifier.testTag("player_repeat_btn")) {
+                                Icon(
+                                    imageVector = if (playbackState.repeatMode == RepeatModeState.ONE) Icons.Filled.RepeatOne else Icons.Filled.Repeat,
+                                    contentDescription = tr(isArabic, "Repeat", "تكرار"),
+                                    tint = if (playbackState.repeatMode != RepeatModeState.OFF) spec.primary else spec.textSecondary
+                                )
+                            }
                         }
                     }
                 }
@@ -535,13 +542,13 @@ fun NowPlayingScreen(
                                 Text(qTrack.artist, color = spec.textSecondary, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
                             }
                             IconButton(onClick = { if (index > 0) onMoveQueueItem(index, index - 1) }, enabled = index > 0) {
-                                Icon(Icons.Filled.ArrowUpward, contentDescription = "Move up", tint = spec.textSecondary)
+                                Icon(Icons.Filled.ArrowUpward, contentDescription = tr(isArabic, "Move up", "تحريك لأعلى"), tint = spec.textSecondary)
                             }
                             IconButton(onClick = { if (index < playbackState.queue.lastIndex) onMoveQueueItem(index, index + 1) }, enabled = index < playbackState.queue.lastIndex) {
-                                Icon(Icons.Filled.ArrowDownward, contentDescription = "Move down", tint = spec.textSecondary)
+                                Icon(Icons.Filled.ArrowDownward, contentDescription = tr(isArabic, "Move down", "تحريك لأسفل"), tint = spec.textSecondary)
                             }
                             IconButton(onClick = { onRemoveQueueItem(index) }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Remove", tint = spec.textSecondary)
+                                Icon(Icons.Filled.Close, contentDescription = tr(isArabic, "Remove", "إزالة"), tint = spec.textSecondary)
                             }
                         }
                     }
@@ -572,7 +579,7 @@ fun NowPlayingScreen(
                             showLyricsSheet = false
                             onEditLyrics(track)
                         }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Edit lyrics", tint = spec.primary)
+                            Icon(Icons.Filled.Edit, contentDescription = tr(isArabic, "Edit lyrics", "تعديل الكلمات"), tint = spec.primary)
                         }
                     }
                 }

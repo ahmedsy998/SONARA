@@ -69,6 +69,7 @@ fun SonaraTheme(
     val (displayFamily, bodyFamily) = SonaraFonts.resolveFamilies(
         themeId = spec.id,
         fontChoice = spec.fontChoice,
+        preferredArabicFont = spec.preferredArabicFont,
         isArabic = isArabic
     )
     val typography = SonaraFonts.buildTypography(displayFamily, bodyFamily, spec.density.scale)

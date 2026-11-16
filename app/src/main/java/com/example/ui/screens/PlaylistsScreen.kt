@@ -112,7 +112,7 @@ fun PlaylistsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { openedPlaylistId = null }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = spec.textPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr(isArabic, "Back", "رجوع"), tint = spec.textPrimary)
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(openedPlaylist.playlist.name, color = spec.textPrimary, style = MaterialTheme.typography.titleLarge)
@@ -158,7 +158,7 @@ fun PlaylistsScreen(
                                     },
                                     enabled = index > 0
                                 ) {
-                                    Icon(Icons.Filled.ArrowUpward, contentDescription = "Move up", tint = spec.textSecondary)
+                                    Icon(Icons.Filled.ArrowUpward, contentDescription = tr(isArabic, "Move up", "تحريك لأعلى"), tint = spec.textSecondary)
                                 }
                                 IconButton(
                                     onClick = {
@@ -166,10 +166,10 @@ fun PlaylistsScreen(
                                     },
                                     enabled = index < openedPlaylist.tracks.lastIndex
                                 ) {
-                                    Icon(Icons.Filled.ArrowDownward, contentDescription = "Move down", tint = spec.textSecondary)
+                                    Icon(Icons.Filled.ArrowDownward, contentDescription = tr(isArabic, "Move down", "تحريك لأسفل"), tint = spec.textSecondary)
                                 }
                                 IconButton(onClick = { onRemoveFromPlaylist(openedPlaylist.playlist.id, track.id) }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = spec.primary)
+                                    Icon(Icons.Filled.Delete, contentDescription = tr(isArabic, "Remove", "إزالة"), tint = spec.primary)
                                 }
                             }
                         }
@@ -185,7 +185,7 @@ fun PlaylistsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { openedSmartTitle = null }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = spec.textPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr(isArabic, "Back", "رجوع"), tint = spec.textPrimary)
                     }
                     Text(openedSmartTitle.orEmpty(), color = spec.textPrimary, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
                     if (openedSmartTracks.isNotEmpty()) {
@@ -305,10 +305,10 @@ fun PlaylistsScreen(
                                     Text("${item.tracks.size} ${tr(isArabic, "songs", "أغاني")}", color = spec.textSecondary, style = MaterialTheme.typography.bodyMedium)
                                 }
                                 IconButton(onClick = { renameTarget = item.playlist }) {
-                                    Icon(Icons.Filled.Edit, contentDescription = "Rename", tint = spec.textSecondary)
+                                    Icon(Icons.Filled.Edit, contentDescription = tr(isArabic, "Rename", "إعادة تسمية"), tint = spec.textSecondary)
                                 }
                                 IconButton(onClick = { onDeletePlaylist(item.playlist.id) }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = spec.primary)
+                                    Icon(Icons.Filled.Delete, contentDescription = tr(isArabic, "Delete", "حذف"), tint = spec.primary)
                                 }
                             }
                         }

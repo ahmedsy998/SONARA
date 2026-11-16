@@ -479,13 +479,16 @@ object SonaraThemeCatalog {
             .getOrDefault(base.density)
         val fontChoice = runCatching { FontChoice.valueOf(customizations.fontChoice) }
             .getOrDefault(base.fontChoice)
+        val preferredArabicFont = runCatching { FontChoice.valueOf(customizations.preferredArabicFont) }
+            .getOrDefault(FontChoice.CAIRO)
 
         var resolved = base.copy(
             cardAlpha = customizations.cardTransparency.coerceIn(0.22f, 1f),
             blurIntensity = customizations.blurIntensity.coerceIn(0f, 1f),
             cornerRadiusDp = customizations.cornerRadiusDp.coerceIn(0f, 32f),
             density = density,
-            fontChoice = fontChoice
+            fontChoice = fontChoice,
+            preferredArabicFont = preferredArabicFont
         )
 
         if (customizations.useCustomColors) {
@@ -528,29 +531,29 @@ object SonaraThemeCatalog {
     fun curatedPalettesFor(themeId: SonaraThemeId): List<ThemePalettePreset> {
         return when (themeId) {
             SonaraThemeId.GLASSMORPHISM_PRO -> listOf(
-                ThemePalettePreset("gl_arctic", "Arctic Prism", 0xFF38BDF8, 0xFF8B5CF6, 0xFF22D3EE, 0xFF070B19, 0xFF16203C, 0xFFF8FAFC),
-                ThemePalettePreset("gl_rose", "Rose Quartz", 0xFFF472B6, 0xFFA855F7, 0xFFFB7185, 0xFF150819, 0xFF281230, 0xFFFDF2F8),
-                ThemePalettePreset("gl_emerald", "Emerald Mist", 0xFF34D399, 0xFF06B6D4, 0xFF6EE7B7, 0xFF041414, 0xFF0D2829, 0xFFECFDF5)
+                ThemePalettePreset("gl_arctic", "Arctic Prism", "موشور قطبي", 0xFF38BDF8, 0xFF8B5CF6, 0xFF22D3EE, 0xFF070B19, 0xFF16203C, 0xFFF8FAFC),
+                ThemePalettePreset("gl_rose", "Rose Quartz", "كوارتز وردي", 0xFFF472B6, 0xFFA855F7, 0xFFFB7185, 0xFF150819, 0xFF281230, 0xFFFDF2F8),
+                ThemePalettePreset("gl_emerald", "Emerald Mist", "ضباب زمردي", 0xFF34D399, 0xFF06B6D4, 0xFF6EE7B7, 0xFF041414, 0xFF0D2829, 0xFFECFDF5)
             )
             SonaraThemeId.NEON_CYBERPUNK -> listOf(
-                ThemePalettePreset("cy_tokyo", "Night City", 0xFF00F0FF, 0xFFFF00AA, 0xFFFCEE09, 0xFF060510, 0xFF100E24, 0xFFF0FDFF),
-                ThemePalettePreset("cy_crimson", "Akira Red", 0xFFFF2A54, 0xFF00E5FF, 0xFFFF9E00, 0xFF0C0408, 0xFF1A0912, 0xFFFFF1F2),
-                ThemePalettePreset("cy_acid", "Acid Matrix", 0xFFA3E635, 0xFF22D3EE, 0xFFFACC15, 0xFF040B06, 0xFF0C1B10, 0xFFF7FEE7)
+                ThemePalettePreset("cy_tokyo", "Night City", "مدينة الليل", 0xFF00F0FF, 0xFFFF00AA, 0xFFFCEE09, 0xFF060510, 0xFF100E24, 0xFFF0FDFF),
+                ThemePalettePreset("cy_crimson", "Akira Red", "أحمر أكيرا", 0xFFFF2A54, 0xFF00E5FF, 0xFFFF9E00, 0xFF0C0408, 0xFF1A0912, 0xFFFFF1F2),
+                ThemePalettePreset("cy_acid", "Acid Matrix", "ماتريكس نيون", 0xFFA3E635, 0xFF22D3EE, 0xFFFACC15, 0xFF040B06, 0xFF0C1B10, 0xFFF7FEE7)
             )
             SonaraThemeId.MINIMAL_LUXURY -> listOf(
-                ThemePalettePreset("lx_champagne", "Champagne Gold", 0xFFD4AF37, 0xFFF3E5AB, 0xFFC59B27, 0xFF0B0A08, 0xFF14120E, 0xFFF8F4EC),
-                ThemePalettePreset("lx_bronze", "Brushed Bronze", 0xFFCD7F32, 0xFFE6BE8A, 0xFFD97706, 0xFF0E0A07, 0xFF1A130D, 0xFFFAF5EE),
-                ThemePalettePreset("lx_platinum", "Platinum Silk", 0xFFE2E8F0, 0xFF94A3B8, 0xFFCBD5E1, 0xFF0A0B0E, 0xFF14161C, 0xFFFFFFFF)
+                ThemePalettePreset("lx_champagne", "Champagne Gold", "ذهب دافئ", 0xFFD4AF37, 0xFFF3E5AB, 0xFFC59B27, 0xFF0B0A08, 0xFF14120E, 0xFFF8F4EC),
+                ThemePalettePreset("lx_bronze", "Brushed Bronze", "برونز مصقول", 0xFFCD7F32, 0xFFE6BE8A, 0xFFD97706, 0xFF0E0A07, 0xFF1A130D, 0xFFFAF5EE),
+                ThemePalettePreset("lx_platinum", "Platinum Silk", "حرير بلاتيني", 0xFFE2E8F0, 0xFF94A3B8, 0xFFCBD5E1, 0xFF0A0B0E, 0xFF14161C, 0xFFFFFFFF)
             )
             SonaraThemeId.RETRO_CASSETTE -> listOf(
-                ThemePalettePreset("rc_amber", "Maxell Amber", 0xFFF59E0B, 0xFFEA580C, 0xFFEF4444, 0xFF1B1714, 0xFF28221D, 0xFFFAF0DC),
-                ThemePalettePreset("rc_mint", "Walkman Teal", 0xFF14B8A6, 0xFFF59E0B, 0xFFFB7185, 0xFF121A1B, 0xFF1B2729, 0xFFECFDF5),
-                ThemePalettePreset("rc_cream", "Studio Tape", 0xFFD97706, 0xFFB45309, 0xFFDC2626, 0xFFF2E9D8, 0xFFFAF4E8, 0xFF231C16)
+                ThemePalettePreset("rc_amber", "Maxell Amber", "كهرمان كلاسيكي", 0xFFF59E0B, 0xFFEA580C, 0xFFEF4444, 0xFF1B1714, 0xFF28221D, 0xFFFAF0DC),
+                ThemePalettePreset("rc_mint", "Walkman Teal", "تركواز ووكمان", 0xFF14B8A6, 0xFFF59E0B, 0xFFFB7185, 0xFF121A1B, 0xFF1B2729, 0xFFECFDF5),
+                ThemePalettePreset("rc_cream", "Studio Tape", "شريط استوديو", 0xFFD97706, 0xFFB45309, 0xFFDC2626, 0xFFF2E9D8, 0xFFFAF4E8, 0xFF231C16)
             )
             else -> listOf(
-                ThemePalettePreset("p_ocean", "Oceanic Cyan", 0xFF0EA5E9, 0xFF6366F1, 0xFF38BDF8, 0xFF08101E, 0xFF121E33, 0xFFF8FAFC),
-                ThemePalettePreset("p_sunset", "Velvet Sunset", 0xFFF97316, 0xFFEC4899, 0xFFFACC15, 0xFF170B12, 0xFF26121D, 0xFFFFF7ED),
-                ThemePalettePreset("p_royal", "Royal Violet", 0xFF8B5CF6, 0xFFEC4899, 0xFFC084FC, 0xFF0C091A, 0xFF181230, 0xFFF5F3FF)
+                ThemePalettePreset("p_ocean", "Oceanic Cyan", "سماوي محيطي", 0xFF0EA5E9, 0xFF6366F1, 0xFF38BDF8, 0xFF08101E, 0xFF121E33, 0xFFF8FAFC),
+                ThemePalettePreset("p_sunset", "Velvet Sunset", "غروب مخملي", 0xFFF97316, 0xFFEC4899, 0xFFFACC15, 0xFF170B12, 0xFF26121D, 0xFFFFF7ED),
+                ThemePalettePreset("p_royal", "Royal Violet", "بنفسجي ملكي", 0xFF8B5CF6, 0xFFEC4899, 0xFFC084FC, 0xFF0C091A, 0xFF181230, 0xFFF5F3FF)
             )
         }
     }

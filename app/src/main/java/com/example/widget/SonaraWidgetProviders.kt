@@ -19,8 +19,10 @@ open class BaseSonaraWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         CoroutineScope(Dispatchers.IO).launch {
-            val prefs = SonaraPreferencesRepository(context).getWidgetCustomizationsSnapshot()
-            WidgetUpdater.updateAllWidgets(context, WidgetUpdater.lastSnapshot, prefs)
+            val repo = SonaraPreferencesRepository(context)
+            val prefs = repo.getWidgetCustomizationsSnapshot()
+            val playPrefs = repo.getPlaybackPreferencesSnapshot()
+            WidgetUpdater.updateAllWidgets(context, WidgetUpdater.lastSnapshot, prefs, playPrefs.language)
         }
     }
 

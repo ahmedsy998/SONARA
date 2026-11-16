@@ -22,6 +22,7 @@ import com.example.model.AudioTrack
 import com.example.model.EqualizerConfig
 import com.example.model.EqualizerPreset
 import com.example.model.FolderGroup
+import com.example.model.FontChoice
 import com.example.model.GenreGroup
 import com.example.model.LibraryTab
 import com.example.model.LrcLine
@@ -35,6 +36,8 @@ import com.example.player.PlaybackController
 import com.example.player.PlaybackUiState
 import com.example.player.SonaraAudioBridge
 import com.example.theme.SonaraThemeCatalog
+import com.example.ui.util.isArabicLanguage
+import com.example.ui.util.tr
 import com.example.widget.WidgetUpdater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -149,7 +152,7 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
             AlbumGroup(
                 id = key.first,
                 name = key.second,
-                artist = list.firstOrNull()?.artist ?: "Unknown Artist",
+                artist = list.firstOrNull()?.artist ?: tr(isAr(), "Unknown Artist", "فنان غير معروف"),
                 artUri = list.firstOrNull { it.albumArtUri != null }?.albumArtUri,
                 tracks = list.sortedBy { it.trackNumber }
             )
@@ -307,7 +310,7 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
                 }
                 playbackController.playTracks(listOf(imported), 0)
             } else {
-                showMessage("Unable to open selected audio file.")
+                showLocalizedMessage("Unable to open selected audio file.", "تعذر فتح الملف الصوتي المحدد.")
             }
         }
     }
@@ -392,7 +395,10 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
                 PlaylistTrackCrossRef(playlistId = playlistId, trackId = tid, sortOrder = order++)
             }
             playlistDao.insertPlaylistTracks(refs)
-            showMessage("Added ${refs.size} track(s) to playlist")
+            showLocalizedMessage(
+                "Added ${refs.size} track(s) to playlist",
+                "تمت إضافة ${refs.size} مقطع إلى القائمة"
+            )
         }
     }
 
@@ -429,20 +435,23 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
                 _currentLyricsRaw.value = lyrics
                 _currentLrcLines.value = libraryRepo.parseLrcLines(lyrics)
             }
-            showMessage("Metadata updated")
+            showLocalizedMessage("Metadata updated", "تم تحديث بيانات المقطع")
         }
     }
 
     fun shareTrack(track: AudioTrack) {
-        libraryRepo.shareTrack(track)
+        libraryRepo.shareTrack(track, isArabic = isAr())
     }
 
     fun setAsRingtone(track: AudioTrack) {
         val ok = libraryRepo.setAsRingtone(track)
         if (ok) {
-            showMessage("Ringtone set to ${track.title}")
+            showLocalizedMessage("Ringtone set to ${track.title}", "تم تعيين نغمة الرنين إلى ${track.title}")
         } else {
-            showMessage("Grant 'Modify system settings' permission to set ringtone")
+            showLocalizedMessage(
+                "Grant 'Modify system settings' permission to set ringtone",
+                "يرجى منح صلاحية تعديل إعدادات النظام لتعيين نغمة الرنين"
+            )
         }
     }
 
@@ -467,16 +476,34 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             prefsRepo.saveThemeCustomizations(customizations)
             _previewThemeCustomizations.value = null
-            showMessage("Theme applied")
+            showLocalizedMessage("Theme applied", "تم تطبيق الثيم بنجاح")
         }
     }
 
     fun restoreDefaultTheme() {
         viewModelScope.launch(Dispatchers.IO) {
-            val default = ThemeCustomizations()
+            val default = ThemeCustomizations(preferredArabicFont = themeCustomizations.value.preferredArabicFont)
             prefsRepo.saveThemeCustomizations(default)
             _previewThemeCustomizations.value = null
-            showMessage("Restored default SONARA theme")
+            showLocalizedMessage("Restored default SONARA theme", "تمت استعادة ثيم سونارا الافتراضي")
+        }
+    }
+
+    fun setPreferredArabicFont(font: FontChoice) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val current = themeCustomizations.value
+            val currentChoice = runCatching { FontChoice.valueOf(current.fontChoice) }.getOrNull()
+            val updatedFontChoice = if (currentChoice != null && currentChoice.isArabicFriendly && currentChoice != FontChoice.THEME_DEFAULT) {
+                font.name
+            } else {
+                current.fontChoice
+            }
+            prefsRepo.saveThemeCustomizations(
+                current.copy(
+                    preferredArabicFont = font.name,
+                    fontChoice = updatedFontChoice
+                )
+            )
         }
     }
 
@@ -492,7 +519,7 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
                     serializedJson = jsonStr
                 )
             )
-            showMessage("Saved preset \"$trimmed\"")
+            showLocalizedMessage("Saved preset \"$trimmed\"", "تم حفظ الثيم \"$trimmed\"")
         }
     }
 
@@ -511,7 +538,12 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
     fun updateWidgetCustomizations(customizations: WidgetCustomizations) {
         viewModelScope.launch(Dispatchers.IO) {
             prefsRepo.saveWidgetCustomizations(customizations)
-            WidgetUpdater.updateAllWidgets(getApplication(), WidgetUpdater.lastSnapshot, customizations)
+            WidgetUpdater.updateAllWidgets(
+                context = getApplication(),
+                snapshot = WidgetUpdater.lastSnapshot,
+                customizations = customizations,
+                language = playbackPrefs.value.language
+            )
         }
     }
 
@@ -557,7 +589,21 @@ class SonaraViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setLanguage(language: AppLanguage) {
-        viewModelScope.launch(Dispatchers.IO) { prefsRepo.saveLanguage(language) }
+        viewModelScope.launch(Dispatchers.IO) {
+            prefsRepo.saveLanguage(language)
+            WidgetUpdater.updateAllWidgets(
+                context = getApplication(),
+                snapshot = WidgetUpdater.lastSnapshot,
+                customizations = widgetCustomizations.value,
+                language = language
+            )
+        }
+    }
+
+    private fun isAr(): Boolean = isArabicLanguage(playbackPrefs.value.language)
+
+    private fun showLocalizedMessage(en: String, ar: String) {
+        _statusMessage.value = tr(isAr(), en, ar)
     }
 
     fun showMessage(msg: String) {

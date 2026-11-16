@@ -292,7 +292,7 @@ class AudioLibraryRepository(
         }
     }
 
-    fun shareTrack(track: AudioTrack) {
+    fun shareTrack(track: AudioTrack, isArabic: Boolean = false) {
         val shareUri = runCatching {
             if (track.filePath.isNotBlank() && File(track.filePath).exists()) {
                 FileProvider.getUriForFile(
@@ -311,7 +311,8 @@ class AudioLibraryRepository(
             putExtra(Intent.EXTRA_SUBJECT, "${track.title} - ${track.artist}")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        val chooser = Intent.createChooser(intent, "Share ${track.title}").apply {
+        val chooserTitle = if (isArabic) "مشاركة ${track.title}" else "Share ${track.title}"
+        val chooser = Intent.createChooser(intent, chooserTitle).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(chooser)

@@ -127,7 +127,7 @@ fun ThemeStudioScreen(
                     onPreviewChange(null)
                     onBack()
                 }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = activeSpec.textPrimary)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr(isArabic, "Back", "رجوع"), tint = activeSpec.textPrimary)
                 }
                 Text(
                     text = tr(isArabic, "Theme Studio", "استوديو الثيمات"),
@@ -176,8 +176,8 @@ fun ThemeStudioScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Midnight Resonance", color = activeSpec.textPrimary, style = MaterialTheme.typography.titleMedium)
-                                Text("SONARA Studio Engine", color = activeSpec.textSecondary, style = MaterialTheme.typography.bodyMedium)
+                                Text(tr(isArabic, "Midnight Resonance", "صدى منتصف الليل"), color = activeSpec.textPrimary, style = MaterialTheme.typography.titleMedium)
+                                Text(tr(isArabic, "SONARA Studio Engine", "محرك استوديو سونارا"), color = activeSpec.textSecondary, style = MaterialTheme.typography.bodyMedium)
                             }
                             Box(
                                 modifier = Modifier
@@ -292,7 +292,7 @@ fun ThemeStudioScreen(
                             ) {
                                 Box(Modifier.size(18.dp).clip(CircleShape).background(Color(p.primaryHex)))
                                 Box(Modifier.size(18.dp).clip(CircleShape).background(Color(p.secondaryHex)))
-                                Text(p.name, color = activeSpec.textPrimary, style = MaterialTheme.typography.labelLarge)
+                                Text(tr(isArabic, p.name, p.nameAr), color = activeSpec.textPrimary, style = MaterialTheme.typography.labelLarge)
                             }
                         }
                     }
@@ -469,12 +469,17 @@ fun ThemeStudioScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    val baseTheme = runCatching { SonaraThemeId.valueOf(preset.baseThemeId) }.getOrNull()
                                     Column {
                                         Text(preset.name, color = activeSpec.textPrimary, fontWeight = FontWeight.Bold)
-                                        Text(preset.baseThemeId, color = activeSpec.textSecondary, style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            text = baseTheme?.let { tr(isArabic, it.displayNameEn, it.displayNameAr) } ?: preset.baseThemeId,
+                                            color = activeSpec.textSecondary,
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
                                     }
                                     IconButton(onClick = { onDeletePreset(preset.id) }) {
-                                        Icon(Icons.Filled.Delete, contentDescription = "Delete preset", tint = activeSpec.primary)
+                                        Icon(Icons.Filled.Delete, contentDescription = tr(isArabic, "Delete preset", "حذف الثيم المحفوظ"), tint = activeSpec.primary)
                                     }
                                 }
                             }
@@ -496,8 +501,18 @@ fun ThemeStudioScreen(
             ColorTarget.GRADIENT_START -> draft.gradientStartHex
             ColorTarget.GRADIENT_END -> draft.gradientEndHex
         }
+        val targetTitle = when (target) {
+            ColorTarget.PRIMARY -> tr(isArabic, "Primary Color", "اللون الأساسي")
+            ColorTarget.SECONDARY -> tr(isArabic, "Secondary Color", "اللون الثانوي")
+            ColorTarget.ACCENT -> tr(isArabic, "Accent Color", "لون التمييز")
+            ColorTarget.BACKGROUND -> tr(isArabic, "Background Color", "لون الخلفية")
+            ColorTarget.SURFACE -> tr(isArabic, "Surface Color", "لون البطاقة")
+            ColorTarget.TEXT -> tr(isArabic, "Text Color", "لون النص")
+            ColorTarget.GRADIENT_START -> tr(isArabic, "Gradient Start Color", "لون بداية التدرج")
+            ColorTarget.GRADIENT_END -> tr(isArabic, "Gradient End Color", "لون نهاية التدرج")
+        }
         ColorPickerDialog(
-            title = target.name.replace("_", " "),
+            title = targetTitle,
             initialHex = initHex,
             isArabic = isArabic,
             onDismiss = { colorPickerTarget = null },
