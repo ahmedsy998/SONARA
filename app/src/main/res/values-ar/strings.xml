@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">SONARA</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_library">المكتبة</string>
+    <string name="nav_search">بحث</string>
+    <string name="nav_player">المشغّل</string>
+    <string name="nav_playlists">القوائم</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="widget_compact_name">SONARA مدمج</string>
+    <string name="widget_compact_desc">شريط تشغيل موسيقى مدمج مع الغلاف وأزرار التحكم.</string>
+    <string name="widget_glass_name">SONARA زجاجي</string>
+    <string name="widget_glass_desc">ويدجت زجاجي شفاف مع تخصيص الألوان.</string>
+    <string name="widget_large_name">SONARA استوديو كبير</string>
+    <string name="widget_large_desc">ويدجت كبير مع صورة الألبوم وشريط التقدم والتحكم الكامل.</string>
+    <string name="widget_minimal_name">SONARA بسيط</string>
+    <string name="widget_minimal_desc">ويدجت موسيقى أنيق وبسيط.</string>
+    <string name="notification_channel_name">تشغيل SONARA</string>
+    <string name="notification_channel_desc">عناصر التحكم في تشغيل الموسيقى</string>
+    <string name="no_track_playing">لا يوجد تشغيل حالياً</string>
+    <string name="tap_to_open">اضغط لفتح SONARA</string>
+</resources>

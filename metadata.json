@@ -1,0 +1,6 @@
+{
+  "name": "SONARA",
+  "description": "Next-generation adaptive Android music player with 15 unique design themes, Theme Studio, real home-screen widgets, Media3 audio engine, 10-band equalizer, and live audio visualizers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

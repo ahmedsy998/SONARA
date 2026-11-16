@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sonara_splash_bg">#0B0D17</color>
+    <color name="widget_bg_dark">#E6111625</color>
+    <color name="widget_bg_glass">#8016213E</color>
+    <color name="widget_bg_minimal">#F2090B10</color>
+    <color name="widget_accent">#38BDF8</color>
+    <color name="widget_text_primary">#FFFFFFFF</color>
+    <color name="widget_text_secondary">#B3CBD5E1</color>
+</resources>
